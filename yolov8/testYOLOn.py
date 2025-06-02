@@ -16,6 +16,7 @@ while cap.isOpened():
         # Run YOLOv8 inference on the frame
         results = model(frame)
 
+        print(results)
         # Visualize the results on the frame
         annotated_frame = results[0].plot()
 
