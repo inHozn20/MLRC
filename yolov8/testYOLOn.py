@@ -69,8 +69,12 @@ def getObjXY(lResults) :
         class_id = int(box.cls[0])
         conf = float(box.conf[0])
         class_name = lResults[0].names[class_id]
+        bDanger = False
         
-        OBJ_INFO.append([int(ruX1), int(ruY1), int(ldX2), int(ldY2), class_name, round(conf, 2), getObjAngle(int(ruX1), int(ldX2))]) 
+        if ldX2 - ruX1 >= 160 and ldY2 - ruX1 >= 160 :
+            bDanger = True
+
+        OBJ_INFO.append([int(ruX1), int(ruY1), int(ldX2), int(ldY2), class_name, round(conf, 2), getObjAngle(int(ruX1), int(ldX2)), bDanger]) 
 
     return OBJ_INFO
    
@@ -103,13 +107,11 @@ while cap.isOpened():
         results = model(frame)
 
         # Visualize the results on the frame
+        for obj in getObjXY(results) :
+            print("perceived objects : " + str(obj))
+            print(obj[7])
         annotated_frame = results[0].plot()
-        print("perceived objects({0}) : ".format(len(results)) + str(getObjXY(results)))
-        if getObjXY(results)[2]-getObjXY(results)[0] >= 100 and getObjXY(results)[3]-getObjXY[1] >= 100  :
-            print("Be careful")
-        else :
-            print("Go ahead")
-
+        
 
         # Display the annotated frame
         cv2.imshow("YOLOv8 Inference", annotated_frame)
