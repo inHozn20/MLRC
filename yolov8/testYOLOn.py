@@ -5,8 +5,13 @@ import time
 # Load the YOLOv8 model
 model = YOLO('yolov8n.pt')
 
+
+
 # Open the video file
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture("http://192.168.0.158:8080/video")
+
+cv2.namedWindow("YOLOv8 Inference", cv2.WINDOW_NORMAL)
+cv2.resizeWindow("YOLOv8 Inference", 640, 480)
 
 '''
 내 화면 프레임
@@ -114,7 +119,9 @@ while cap.isOpened():
         
 
         # Display the annotated frame
+        
         cv2.imshow("YOLOv8 Inference", annotated_frame)
+        
 
         # Break the loop if 'q' is pressed
         if cv2.waitKey(1) & 0xFF == ord("q"):
