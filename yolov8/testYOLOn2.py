@@ -66,9 +66,9 @@ def getObjXY(lResults):
     return OBJ_INFO
 
 
-# ----- 메인 실행 -----
-# IP Webcam 주소로 변경 ("/video" 엔드포인트 필수)
+# main excute
 stream_url = "http://192.168.0.158:8080/video"
+stream_url = "http://11.246.180.30:8080/video"
 vs = VideoStream(stream_url)
 
 rI = 0
@@ -82,6 +82,7 @@ while True:
 
     success, frame = vs.read()
     if not success:
+        print("connect error")
         continue
 
     # 리사이즈로 YOLO 처리 속도 향상

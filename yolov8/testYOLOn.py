@@ -1,5 +1,7 @@
 import cv2
+
 from ultralytics import YOLO
+
 import time
 
 # Load the YOLOv8 model
@@ -8,11 +10,16 @@ model = YOLO('yolov8n.pt')
 
 
 # Open the video file
-cap = cv2.VideoCapture("http://192.168.0.158:8080/video")
+cap = cv2.VideoCapture(0)
+print(cap)
 
 cv2.namedWindow("YOLOv8 Inference", cv2.WINDOW_NORMAL)
 cv2.resizeWindow("YOLOv8 Inference", 640, 480)
+######
 
+'''
+dddddddddddddddddddddddddddddddddd
+'''
 '''
 내 화면 프레임
 
@@ -89,15 +96,40 @@ def getObjXY(lResults) :
 
 rI = 0
 
+'''
+변수
 
+int
+float
+double
+long
+list
+tuple = (1,2)
+boolean = false or ture
+
+'''
 
 # Loop through the video frames
-while cap.isOpened():
+while cap.isOpened() :
 
-    print()
+    print() # 한칸 내리기
     print()
     rI += 1
-    print("<<<<<{0}>>>>>>".format(rI))
+    """
+    변수이름 작성법
+    1)
+    snake >> basball_score = 100
+    낙타   >> baseballScore = 100
+    2)
+    변수 타입 다양
+    int = i
+    float = f
+    double = d
+
+    ibaseballScore = 100
+    
+    """
+    print("<<<<<{0}>>>>>>".format(rI))  
 
     # delay checking
     nowTime = time.time()
@@ -106,7 +138,7 @@ while cap.isOpened():
     # Read a frame from the video
     success, frame = cap.read()
 
-    if success:
+    if success :
 
         # Run YOLOv8 inference on the frame
         results = model(frame)
@@ -133,6 +165,7 @@ while cap.isOpened():
 
     else:
         # Break the loop if the end of the video is reached
+        
         break
 
 # Release the video capture object and close the display window
