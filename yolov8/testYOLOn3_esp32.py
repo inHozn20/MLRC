@@ -1,18 +1,35 @@
-import cv2
+import cv2, time, threading
 from ultralytics import YOLO
+import serial
 import time
-import threading
 
+# ESP32가 연결된 포트 이름 
+port = 'COM8'        
+baud = 921600
+
+ser = serial.Serial(port, baud, timeout=1)
+print("conneting..")
+
+time.sleep(2)  # ESP32 초기화 대기x``
+print("complete")
+
+"""
+평균적으로 0.2s 프레임
+"""
+# 양자컴퓨터
+
+# OpenCV 최적화
+cv2.setUseOptimized(True)
+    
 # Load YOLOv8 Nano model
 model = YOLO('yolov8n.pt')
-
-
-
+model.fuse()  # 모델 내 BatchNorm 등 합치기
 
 # ----- VideoStream 클래스 정의 (스레드 기반) -----
 class VideoStream:
     def __init__(self, src):
         self.cap = cv2.VideoCapture(src)
+        self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # 버퍼 최소화
         self.ret, self.frame = self.cap.read()
         self.running = True
         threading.Thread(target=self.update, daemon=True).start()
@@ -68,11 +85,11 @@ def getObjXY(lResults):
     return OBJ_INFO
 
 
-# main excute
-#stream_url = "http://192.168.0.158:8080/video"
-#stream_url = "http://11.246.180.30:8080/video"
+# main
 stream_url = "http://192.168.0.3:8080/video"
+stream_url = "http://172.30.1.66:8080/video"
 stream_url = 0
+#stream_url = "http://11.246.180.30:8080/video"
 vs = VideoStream(stream_url)
 
 rI = 0
@@ -80,26 +97,50 @@ cv2.namedWindow("YOLOv8 Inference", cv2.WINDOW_NORMAL)
 cv2.resizeWindow("YOLOv8 Inference", 640, 480)
 
 while True:
+    # esp32 받아오기
+    if ser.in_waiting :
+        raw = ser.readline()
+        print("Raw bytes:", raw)
+        line = ser.readline().decode('utf-8').strip()
+        print("받은 메시지:", line)
+
+    # 진행
     rI += 1
     print(f"\n\n<<<<< {rI} >>>>>")
     start_time = time.time()
 
     success, frame = vs.read()
-    if not success:
+    if not success or frame is None:
         print("connect error")
         break
 
-    # 리사이즈로 YOLO 처리 속도 향상
     frame = cv2.resize(frame, (640, 480))
 
-    results = model(frame)
+    # 추론 (with stream=False for single-frame)
+    results = model.predict(frame, verbose=False, stream=False)
+
+    if len(results) != 0 :
+        ser.write((str(1) + '\n').encode())   # 문자열을 바이트로 인코딩하여 송신
+        print("ok")
 
     for obj in getObjXY(results):
         print("perceived objects :", obj)
         print("danger:", obj[7])
 
-    annotated_frame = results[0].plot()
-    cv2.imshow("YOLOv8 Inference", annotated_frame)
+    # 시각화
+    #annotated_frame = results[0].plot()
+    for box in results[0].boxes:
+        x1, y1, x2, y2 = map(int, box.xyxy[0])
+        class_id = int(box.cls[0])
+        conf = float(box.conf[0])
+        class_name = results[0].names[class_id]
+        
+        label = f"{class_name} {conf:.2f}"
+        color = (0, 255, 0) if conf > 0.5 else (0, 0, 255)
+
+        cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+        cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+    cv2.imshow("YOLOv8 Inference", frame)
 
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break

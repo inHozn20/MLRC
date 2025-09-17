@@ -2,8 +2,11 @@ import cv2
 import numpy as np
 
 # 두 카메라 열기 (왼쪽: 0, 오른쪽: 1)
-cap_left = cv2.VideoCapture("http://192.168.0.158:8080/video")
-cap_right = cv2.VideoCapture("http://192.168.0.173:8080/video")
+# 학교 wifi
+# "http://192.168.0.158:8080/video"
+# "http://192.168.0.173:8080/video"
+cap_left = cv2.VideoCapture("http://192.168.0.3:8080/video")
+cap_right = cv2.VideoCapture("http://192.168.0.14:8080/video")
 
 cv2.namedWindow("Left", cv2.WINDOW_NORMAL)
 cv2.resizeWindow("Left", 640, 480)

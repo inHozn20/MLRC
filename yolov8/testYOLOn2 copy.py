@@ -2,11 +2,15 @@ import cv2
 from ultralytics import YOLO
 import time
 import threading
+import serial
+import time
 
 # Load YOLOv8 Nano model
 model = YOLO('yolov8n.pt')
 
-
+# 포트
+ser = serial.Serial('COM11', 115200, timeout=1)
+time.sleep(2)  # ESP32 초기화 대기
 
 
 # ----- VideoStream 클래스 정의 (스레드 기반) -----
@@ -95,9 +99,10 @@ while True:
     results = model(frame)
 
     for obj in getObjXY(results):
-        print("perceived objects :", obj)
-        print("danger:", obj[7])
-
+        #print("perceived objects :", obj)
+        #print("danger:", obj[7])
+        pass
+        
     annotated_frame = results[0].plot()
     cv2.imshow("YOLOv8 Inference", annotated_frame)
 
@@ -105,6 +110,9 @@ while True:
         break
 
     print(f"OAT: {round(time.time() - start_time, 2)}s")
+    msg = str(obj) + "\n"
+    ser.write(msg.encode('utf-8'))
+    print(f"보낸 메시지: {msg.strip()}")
 
 vs.stop()
 cv2.destroyAllWindows()

@@ -10,11 +10,10 @@ model = YOLO('yolov8n.pt')
 
 
 # Open the video file
-cap = cv2.VideoCapture(0)
-print(cap)
+cap = cv2.VideoCapture("https://192.168.0.3:8080/video")
 
 cv2.namedWindow("YOLOv8 Inference", cv2.WINDOW_NORMAL)
-cv2.resizeWindow("YOLOv8 Inference", 640, 480)
+cv2.resizeWindow("YOLOv8 Inference", 480, 640)
 ######
 
 '''
